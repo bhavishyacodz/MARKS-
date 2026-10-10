@@ -17,7 +17,7 @@ MARKS-/
 ## Current question set
 
 - Only verified JEE Main PYQs are shown; starter/sample questions have been removed.
-- Current batch: Physics, Chemistry and Mathematics, 02 April 2025, Shift 2 (12 questions total: 4 per subject).
+- Current batch: Physics, Chemistry and Mathematics, 02 April 2025, Shift 2 (12 questions total: 3 Physics, 3 Chemistry and 6 Mathematics).
 - Answers were checked against the NTA final answer key. Questions are paraphrased for practice.
 - Each question includes options, concept, worked steps, final answer, and NTA question/option IDs.
 
