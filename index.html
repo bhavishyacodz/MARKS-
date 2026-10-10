@@ -11,7 +11,7 @@
 <div class="app">
 <header class="top"><div class="brand"><div class="logo">P</div><div>prepwise<div class="tag">JEE MAIN • PRACTICE SMARTER</div></div></div><div class="streak">✨ Sample mode · No login</div></header>
 <section class="welcome"><div><div class="eyebrow">YOUR STUDY SPACE</div><h1>Small steps.<br>Stronger concepts.</h1><p>Practice, review mistakes, and build consistency.</p></div><button class="btn" onclick="showTab('practice')">Start practising →</button></section>
-<div class="notice">12 sourced, paraphrased PYQs are currently loaded from 02 Apr 2025 Shift 2. More year/shift papers can be added as verified question sets become available. Progress stays on this device.</div>
+<div class="notice" id="dataNotice" role="status">Loading question bank…</div>
 
 <section class="browse" id="subjectBrowser">
  <div class="screen-title"><div><div class="eyebrow">JEE MAIN • PYQ PRACTICE</div><h1>Choose your subject</h1><p>Pick a chapter and continue solving.</p></div><button class="search-button" onclick="showTab('practice')" aria-label="Search questions">⌕</button></div>
@@ -95,7 +95,7 @@ function selectSubjectTab(subject){browseSubject=subject;document.querySelectorA
 function sortNewestFirst(){QUESTIONS.sort(newestFirst);renderChapterBrowser();applyFilters()}
 function renderChapterBrowser(){
  const year=$("browseYear").value,shift=$("browseShift").value,status=$("browseStatus").value;
- let list=QUESTIONS.filter(q=>q.subject===browseSubject&&(year==="All"||String(yearOf(q))===year)&&(shift==="All"||String(shiftOf(q))===shift));
+ let list=QUESTIONS.filter(q=>q.subject===browseSubject&&matchesYear(q,year)&&(shift==="All"||String(shiftOf(q))===shift));
  if(status==="Unsolved")list=list.filter(q=>!attemptFor(q.id));if(status==="Solved")list=list.filter(q=>!!attemptFor(q.id));if(status==="Incorrect")list=list.filter(q=>attemptFor(q.id)&&attemptFor(q.id).correct===false);
  list.sort(newestFirst);const chapters=[...new Set(list.map(q=>q.chapter))];
  $("chapterCount").textContent="Showing chapters ("+chapters.length+")";
@@ -104,14 +104,14 @@ function renderChapterBrowser(){
 }
 function openChapter(subject,chapter){$("subjectFilter").value=subject;$("chapterFilter").value=chapter;showTab("practice");applyFilters()}
 function openSubject(subject){selectSubjectTab(subject);$("subjectFilter").value=subject;showTab("practice");applyFilters()}
-function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}
+function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}\nfunction matchesYear(q,year){return year==="All"||(year==="Demo"?yearOf(q)===0:String(yearOf(q))===year)}
 function shiftOf(q){const m=(q.type||"").match(/Shift\s*(\d+)/i);return m?Number(m[1]):0}
 function dateValue(q){const m=(q.type||"").match(/(\d{1,2})\s+([A-Za-z]{3})/);if(!m)return 0;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(yearOf(q),months[m[2]]??0,Number(m[1])).getTime()}
 function newestFirst(a,b){return yearOf(b)-yearOf(a)||dateValue(b)-dateValue(a)||shiftOf(b)-shiftOf(a)||a.id.localeCompare(b.id)}
 function applyFilters(){
  const sub=$("subjectFilter").value,chap=$("chapterFilter").value,diff=$("difficultyFilter").value;
  const oldId=activeId,year=$("browseYear").value,shift=$("browseShift").value,status=$("browseStatus").value;
- currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff)&&(year==="All"||String(yearOf(q))===year)&&(shift==="All"||String(shiftOf(q))===shift)&& (status!=="Unsolved"||!attemptFor(q.id)) && (status!=="Solved"||!!attemptFor(q.id)) && (status!=="Incorrect"||!!attemptFor(q.id)&&attemptFor(q.id).correct===false)).sort(newestFirst);
+ currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff)&&matchesYear(q,year)&&(shift==="All"||String(shiftOf(q))===shift)&& (status!=="Unsolved"||!attemptFor(q.id)) && (status!=="Solved"||!!attemptFor(q.id)) && (status!=="Incorrect"||!!attemptFor(q.id)&&attemptFor(q.id).correct===false)).sort(newestFirst);
  const chapterOptions=[...new Set(QUESTIONS.filter(q=>sub==="All"||q.subject===sub).map(q=>q.chapter))];
  const select=$("chapterFilter"),old=chap;
  select.innerHTML='<option value="All">All chapters</option>'+chapterOptions.map(c=>`<option>${esc(c)}</option>`).join("");
@@ -169,8 +169,11 @@ function renderContinue(){
 function renderDashboard(){renderContinue()}
 (function init(){
  const allChapters=[...new Set(QUESTIONS.map(q=>q.chapter))];$("chapterFilter").innerHTML='<option value="All">All chapters</option>'+allChapters.map(c=>`<option>${esc(c)}</option>`).join("");
- updateStats();renderDashboard();selectSubjectTab("Physics");applyFilters();
- // Start on dashboard; question practice is ready when opened.
+ const notice=$("dataNotice");
+ if(!QUESTIONS.length){notice.textContent="Question data did not load. Check that data/jee-main-2025.js exists in the repository, then refresh.";notice.style.borderColor="#a64d55";}
+ else {const official=QUESTIONS.filter(q=>/^JEE Main \\d{4}/.test(q.type||"")).length;const demos=QUESTIONS.length-official;notice.textContent=QUESTIONS.length+" questions loaded: "+official+" sourced PYQs and "+demos+" demo practice questions (clearly labeled, not official PYQs). Latest exam sessions sort first. Progress is saved on this device."}
+ updateStats();renderDashboard();selectSubjectTab("Physics");applyFilters();showTab("dashboard");
+ // Start on the subject browser; question cards open the practice view.
 })();
 </script>
 </body>
