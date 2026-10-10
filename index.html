@@ -83,6 +83,7 @@ function updateStats(){
  renderBookmarkList();renderRevisionList();renderQuickRevision();
 }
 function showTab(tab){
+ $("subjectBrowser").classList.toggle("hidden",tab!=="dashboard");
  document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("hidden",e.id!==tab));
  document.querySelectorAll(".nav button").forEach(e=>e.classList.toggle("active",e.dataset.tab===tab));
  document.querySelectorAll(".mobilebar button").forEach(e=>e.classList.toggle("active",e.dataset.mobile===tab));
@@ -109,8 +110,8 @@ function dateValue(q){const m=(q.type||"").match(/(\\d{1,2})\\s+([A-Za-z]{3})/);
 function newestFirst(a,b){return yearOf(b)-yearOf(a)||dateValue(b)-dateValue(a)||shiftOf(b)-shiftOf(a)||a.id.localeCompare(b.id)}
 function applyFilters(){
  const sub=$("subjectFilter").value,chap=$("chapterFilter").value,diff=$("difficultyFilter").value;
- const oldId=activeId;
- currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff)).sort(newestFirst);
+ const oldId=activeId,year=$("browseYear").value,shift=$("browseShift").value,status=$("browseStatus").value;
+ currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff)&&(year==="All"||String(yearOf(q))===year)&&(shift==="All"||String(shiftOf(q))===shift)&& (status!=="Unsolved"||!attemptFor(q.id)) && (status!=="Solved"||!!attemptFor(q.id)) && (status!=="Incorrect"||!!attemptFor(q.id)&&attemptFor(q.id).correct===false)).sort(newestFirst);
  const chapterOptions=[...new Set(QUESTIONS.filter(q=>sub==="All"||q.subject===sub).map(q=>q.chapter))];
  const select=$("chapterFilter"),old=chap;
  select.innerHTML='<option value="All">All chapters</option>'+chapterOptions.map(c=>`<option>${esc(c)}</option>`).join("");
