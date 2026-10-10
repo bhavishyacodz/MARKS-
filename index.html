@@ -54,6 +54,11 @@ const QUESTIONS = window.PYQ_QUESTIONS || [];
 const KEY="prepwise_jee_starter_v1";
 let data={attempts:{},bookmarks:[],lastId:null};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved&&typeof saved==="object")data={...data,...saved}}catch(e){}
+const validIds=new Set(QUESTIONS.map(q=>q.id));
+data.attempts=Object.fromEntries(Object.entries(data.attempts||{}).filter(([id])=>validIds.has(id)));
+data.bookmarks=(data.bookmarks||[]).filter(id=>validIds.has(id));
+if(!validIds.has(data.lastId))data.lastId=null;
+try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 let currentList=QUESTIONS.slice(), currentIndex=0, chosen=null, revealed=false, activeId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
