@@ -16,7 +16,7 @@
 <section class="browse" id="subjectBrowser">
  <div class="screen-title"><div><div class="eyebrow">JEE MAIN • PYQ PRACTICE</div><h1>Choose your subject</h1><p>Pick a chapter and continue solving.</p></div><button class="search-button" onclick="showTab('practice')" aria-label="Search questions">⌕</button></div>
  <div class="subject-tabs" role="tablist"><button class="subject-tab active" data-subject="Physics" onclick="selectSubjectTab('Physics')">Phy</button><button class="subject-tab" data-subject="Chemistry" onclick="selectSubjectTab('Chemistry')">Chem</button><button class="subject-tab" data-subject="Mathematics" onclick="selectSubjectTab('Mathematics')">Math</button><button class="subject-tab" data-subject="Analysis" onclick="showTab('dashboard')">Analysis</button></div>
- <div class="filter-strip"><select id="browseYear" class="field" onchange="renderChapterBrowser()"><option value="All">All years</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option></select><select id="browseShift" class="field" onchange="renderChapterBrowser()"><option value="All">All shifts</option><option value="2">Shift 2</option><option value="1">Shift 1</option></select><select id="browseStatus" class="field" onchange="renderChapterBrowser()"><option value="All">All questions</option><option value="Unsolved">Not solved</option><option value="Solved">Solved</option><option value="Incorrect">Incorrect</option></select><button class="sort-button" onclick="sortNewestFirst()">↕ Sort</button></div>
+ <div class="filter-strip"><select id="browseYear" class="field" onchange="renderChapterBrowser()"><option value="All">All years</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option value="Demo">Demo set</option></select><select id="browseShift" class="field" onchange="renderChapterBrowser()"><option value="All">All shifts</option><option value="2">Shift 2</option><option value="1">Shift 1</option></select><select id="browseStatus" class="field" onchange="renderChapterBrowser()"><option value="All">All questions</option><option value="Unsolved">Not solved</option><option value="Solved">Solved</option><option value="Incorrect">Incorrect</option></select><button class="sort-button" onclick="sortNewestFirst()">↕ Sort</button></div>
  <div class="chapter-count" id="chapterCount">Showing chapters</div><div id="chapterBrowserList" class="chapter-list"></div>
 </section>
 <section class="stats">
@@ -104,7 +104,8 @@ function renderChapterBrowser(){
 }
 function openChapter(subject,chapter){$("subjectFilter").value=subject;$("chapterFilter").value=chapter;showTab("practice");applyFilters()}
 function openSubject(subject){selectSubjectTab(subject);$("subjectFilter").value=subject;showTab("practice");applyFilters()}
-function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}\nfunction matchesYear(q,year){return year==="All"||(year==="Demo"?yearOf(q)===0:String(yearOf(q))===year)}
+function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}
+function matchesYear(q,year){return year==="All"||(year==="Demo"?yearOf(q)===0:String(yearOf(q))===year)}
 function shiftOf(q){const m=(q.type||"").match(/Shift\s*(\d+)/i);return m?Number(m[1]):0}
 function dateValue(q){const m=(q.type||"").match(/(\d{1,2})\s+([A-Za-z]{3})/);if(!m)return 0;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(yearOf(q),months[m[2]]??0,Number(m[1])).getTime()}
 function newestFirst(a,b){return yearOf(b)-yearOf(a)||dateValue(b)-dateValue(a)||shiftOf(b)-shiftOf(a)||a.id.localeCompare(b.id)}
