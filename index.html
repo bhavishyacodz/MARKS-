@@ -104,9 +104,9 @@ function renderChapterBrowser(){
 }
 function openChapter(subject,chapter){$("subjectFilter").value=subject;$("chapterFilter").value=chapter;showTab("practice");applyFilters()}
 function openSubject(subject){selectSubjectTab(subject);$("subjectFilter").value=subject;showTab("practice");applyFilters()}
-function yearOf(q){const m=(q.type||"").match(/JEE Main (\\d{4})/);return m?Number(m[1]):0}
-function shiftOf(q){const m=(q.type||"").match(/Shift\\s*(\\d+)/i);return m?Number(m[1]):0}
-function dateValue(q){const m=(q.type||"").match(/(\\d{1,2})\\s+([A-Za-z]{3})/);if(!m)return 0;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(yearOf(q),months[m[2]]??0,Number(m[1])).getTime()}
+function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}
+function shiftOf(q){const m=(q.type||"").match(/Shift\s*(\d+)/i);return m?Number(m[1]):0}
+function dateValue(q){const m=(q.type||"").match(/(\d{1,2})\s+([A-Za-z]{3})/);if(!m)return 0;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(yearOf(q),months[m[2]]??0,Number(m[1])).getTime()}
 function newestFirst(a,b){return yearOf(b)-yearOf(a)||dateValue(b)-dateValue(a)||shiftOf(b)-shiftOf(a)||a.id.localeCompare(b.id)}
 function applyFilters(){
  const sub=$("subjectFilter").value,chap=$("chapterFilter").value,diff=$("difficultyFilter").value;
