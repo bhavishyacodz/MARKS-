@@ -172,7 +172,7 @@ function renderDashboard(){renderContinue()}
  const allChapters=[...new Set(QUESTIONS.map(q=>q.chapter))];$("chapterFilter").innerHTML='<option value="All">All chapters</option>'+allChapters.map(c=>`<option>${esc(c)}</option>`).join("");
  const notice=$("dataNotice");
  if(!QUESTIONS.length){notice.textContent="Question data did not load. Check that data/jee-main-2025.js exists in the repository, then refresh.";notice.style.borderColor="#a64d55";}
- else {const official=QUESTIONS.filter(q=>/^JEE Main \\d{4}/.test(q.type||"")).length;const demos=QUESTIONS.length-official;notice.textContent=QUESTIONS.length+" questions loaded: "+official+" sourced PYQs and "+demos+" demo practice questions (clearly labeled, not official PYQs). Latest exam sessions sort first. Progress is saved on this device."}
+ else {const official=QUESTIONS.filter(q=>/^JEE Main \d{4}/.test(q.type||"")).length;const demos=QUESTIONS.length-official;notice.textContent=QUESTIONS.length+" questions loaded: "+official+" sourced PYQs and "+demos+" demo practice questions (clearly labeled, not official PYQs). Latest exam sessions sort first. Progress is saved on this device."}
  updateStats();renderDashboard();selectSubjectTab("Physics");applyFilters();showTab("dashboard");
  // Start on the subject browser; question cards open the practice view.
 })();
