@@ -99,9 +99,10 @@ function renderChapterBrowser(){
  if(status==="Unsolved")list=list.filter(q=>!attemptFor(q.id));if(status==="Solved")list=list.filter(q=>!!attemptFor(q.id));if(status==="Incorrect")list=list.filter(q=>attemptFor(q.id)&&attemptFor(q.id).correct===false);
  list.sort(newestFirst);const chapters=[...new Set(list.map(q=>q.chapter))];
  $("chapterCount").textContent="Showing chapters ("+chapters.length+")";
- const host=$("chapterBrowserList");if(!chapters.length){host.innerHTML='<div class="empty"><strong>No questions found</strong>Choose another year, shift or status.</div>';return}
+ const host=$("chapterBrowserList");if(!chapters.length){host.innerHTML='<div class="empty"><strong>'+(QUESTIONS.length?"No questions match these filters":"Question bank is empty")+'</strong>'+(QUESTIONS.length?"Choose another year, shift or status.":"Check that the question data file is present.")+'<p><button class="btn secondary small" onclick="resetAllFilters()">Reset filters</button></p></div>';return}
  host.innerHTML=chapters.map(ch=>{const qs=list.filter(q=>q.chapter===ch);const done=qs.filter(q=>attemptFor(q.id)).length;const newest=qs[0];return '<button class="chapter-card" data-subject="'+esc(browseSubject)+'" data-chapter="'+esc(ch)+'" onclick="openChapter(this.dataset.subject,this.dataset.chapter)"><span class="chapter-icon">'+({Physics:"↗",Chemistry:"⚗",Mathematics:"∫"}[browseSubject]||"→")+'</span><span class="chapter-info"><b>'+esc(ch)+'</b><small>'+esc(newest.type||"JEE Main PYQ")+'</small><span class="continue-link">Continue solving →</span></span><span class="chapter-progress">'+done+'/'+qs.length+' Qs</span></button>'}).join("");
 }
+function resetAllFilters(){$("browseYear").value="All";$("browseShift").value="All";$("browseStatus").value="All";$("subjectFilter").value="All";$("chapterFilter").value="All";$("difficultyFilter").value="All";renderChapterBrowser();applyFilters()}
 function openChapter(subject,chapter){$("subjectFilter").value=subject;$("chapterFilter").value=chapter;showTab("practice");applyFilters()}
 function openSubject(subject){selectSubjectTab(subject);$("subjectFilter").value=subject;showTab("practice");applyFilters()}
 function yearOf(q){const m=(q.type||"").match(/JEE Main (\d{4})/);return m?Number(m[1]):0}
@@ -117,7 +118,7 @@ function applyFilters(){
  const select=$("chapterFilter"),old=chap;
  select.innerHTML='<option value="All">All chapters</option>'+chapterOptions.map(c=>`<option>${esc(c)}</option>`).join("");
  if(chapterOptions.includes(old))select.value=old;
- if(!currentList.length){$("questionHost").innerHTML='<div class="empty"><strong>No questions match these filters</strong>Try another subject or chapter.</div>';$("filterCount").textContent="0 questions";activeId=null;return}
+ if(!currentList.length){$("questionHost").innerHTML='<div class="empty"><strong>No questions match these filters</strong>Try another subject, chapter, year or shift.<p><button class="btn secondary small" onclick="resetAllFilters()">Reset filters</button></p></div>';$("filterCount").textContent="0 questions";activeId=null;return}
  let ix=currentList.findIndex(q=>q.id===oldId);currentIndex=ix>=0?ix:0;activeId=currentList[currentIndex].id;chosen=null;revealed=false;
  $("filterCount").textContent=currentList.length+" samples";renderQuestion();
 }
