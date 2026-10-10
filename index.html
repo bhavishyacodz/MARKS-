@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f8fc">
+<meta name="theme-color" content="#171a1f">
 <title>Prepwise — JEE Practice</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +11,14 @@
 <div class="app">
 <header class="top"><div class="brand"><div class="logo">P</div><div>prepwise<div class="tag">JEE MAIN • PRACTICE SMARTER</div></div></div><div class="streak">✨ Sample mode · No login</div></header>
 <section class="welcome"><div><div class="eyebrow">YOUR STUDY SPACE</div><h1>Small steps.<br>Stronger concepts.</h1><p>Practice, review mistakes, and build consistency.</p></div><button class="btn" onclick="showTab('practice')">Start practising →</button></section>
-<div class="notice">Question labels distinguish original practice samples from sourced JEE Main PYQs. 12 verified, paraphrased PYQs are available across Physics, Chemistry and Mathematics from 02 Apr 2025 Shift 2. Answers are checked against the NTA final answer key. Progress is saved only in this browser on this device.</div>
+<div class="notice">12 sourced, paraphrased PYQs are currently loaded from 02 Apr 2025 Shift 2. More year/shift papers can be added as verified question sets become available. Progress stays on this device.</div>
+
+<section class="browse" id="subjectBrowser">
+ <div class="screen-title"><div><div class="eyebrow">JEE MAIN • PYQ PRACTICE</div><h1>Choose your subject</h1><p>Pick a chapter and continue solving.</p></div><button class="search-button" onclick="showTab('practice')" aria-label="Search questions">⌕</button></div>
+ <div class="subject-tabs" role="tablist"><button class="subject-tab active" data-subject="Physics" onclick="selectSubjectTab('Physics')">Phy</button><button class="subject-tab" data-subject="Chemistry" onclick="selectSubjectTab('Chemistry')">Chem</button><button class="subject-tab" data-subject="Mathematics" onclick="selectSubjectTab('Mathematics')">Math</button><button class="subject-tab" data-subject="Analysis" onclick="showTab('dashboard')">Analysis</button></div>
+ <div class="filter-strip"><select id="browseYear" class="field" onchange="renderChapterBrowser()"><option value="All">All years</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option></select><select id="browseShift" class="field" onchange="renderChapterBrowser()"><option value="All">All shifts</option><option value="2">Shift 2</option><option value="1">Shift 1</option></select><select id="browseStatus" class="field" onchange="renderChapterBrowser()"><option value="All">All questions</option><option value="Unsolved">Not solved</option><option value="Solved">Solved</option><option value="Incorrect">Incorrect</option></select><button class="sort-button" onclick="sortNewestFirst()">↕ Sort</button></div>
+ <div class="chapter-count" id="chapterCount">Showing chapters</div><div id="chapterBrowserList" class="chapter-list"></div>
+</section>
 <section class="stats">
  <div class="stat"><div class="label">Questions attempted</div><div class="value" id="statAttempt">0</div><div class="hint">Across this device</div></div>
  <div class="stat"><div class="label">Accuracy</div><div class="value" id="statAccuracy">—</div><div class="hint">Correct / attempted</div></div>
@@ -62,7 +69,7 @@ try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 let currentList=QUESTIONS.slice(), currentIndex=0, chosen=null, revealed=false, activeId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){};updateStats()}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){};updateStats();if(typeof renderChapterBrowser==="function")renderChapterBrowser()}
 function attemptFor(id){return data.attempts[id]||null}
 function incorrect(){return QUESTIONS.filter(q=>{const a=attemptFor(q.id);return a&&a.correct===false})}
 function attemptedCount(){return Object.keys(data.attempts).length}
@@ -82,11 +89,28 @@ function showTab(tab){
  if(tab==="practice"&&!activeId){applyFilters()} if(tab==="bookmarks")renderBookmarkList();if(tab==="revision")renderRevisionList();
  window.scrollTo({top:0,behavior:"smooth"});
 }
-function openSubject(subject){$("subjectFilter").value=subject;showTab("practice");applyFilters()}
+let browseSubject="Physics";
+function selectSubjectTab(subject){browseSubject=subject;document.querySelectorAll(".subject-tab").forEach(b=>b.classList.toggle("active",b.dataset.subject===subject));$("subjectFilter").value=subject;renderChapterBrowser()}
+function sortNewestFirst(){QUESTIONS.sort(newestFirst);renderChapterBrowser();applyFilters()}
+function renderChapterBrowser(){
+ const year=$("browseYear").value,shift=$("browseShift").value,status=$("browseStatus").value;
+ let list=QUESTIONS.filter(q=>q.subject===browseSubject&&(year==="All"||String(yearOf(q))===year)&&(shift==="All"||String(shiftOf(q))===shift));
+ if(status==="Unsolved")list=list.filter(q=>!attemptFor(q.id));if(status==="Solved")list=list.filter(q=>!!attemptFor(q.id));if(status==="Incorrect")list=list.filter(q=>attemptFor(q.id)&&attemptFor(q.id).correct===false);
+ list.sort(newestFirst);const chapters=[...new Set(list.map(q=>q.chapter))];
+ $("chapterCount").textContent="Showing chapters ("+chapters.length+")";
+ const host=$("chapterBrowserList");if(!chapters.length){host.innerHTML='<div class="empty"><strong>No questions found</strong>Choose another year, shift or status.</div>';return}
+ host.innerHTML=chapters.map(ch=>{const qs=list.filter(q=>q.chapter===ch);const done=qs.filter(q=>attemptFor(q.id)).length;const newest=qs[0];return '<button class="chapter-card" onclick="openChapter(\\''+esc(browseSubject)+'\\',\\''+esc(ch).replace(/\\'/g,"\\\\'")+'\\')"><span class="chapter-icon">'+({Physics:"↗",Chemistry:"⚗",Mathematics:"∫"}[browseSubject]||"→")+'</span><span class="chapter-info"><b>'+esc(ch)+'</b><small>'+esc(newest.type||"JEE Main PYQ")+'</small><span class="continue-link">Continue solving →</span></span><span class="chapter-progress">'+done+'/'+qs.length+' Qs</span></button>'}).join("");
+}
+function openChapter(subject,chapter){$("subjectFilter").value=subject;$("chapterFilter").value=chapter;showTab("practice");applyFilters()}
+function openSubject(subject){selectSubjectTab(subject);$("subjectFilter").value=subject;showTab("practice");applyFilters()}
+function yearOf(q){const m=(q.type||"").match(/JEE Main (\\d{4})/);return m?Number(m[1]):0}
+function shiftOf(q){const m=(q.type||"").match(/Shift\\s*(\\d+)/i);return m?Number(m[1]):0}
+function dateValue(q){const m=(q.type||"").match(/(\\d{1,2})\\s+([A-Za-z]{3})/);if(!m)return 0;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(yearOf(q),months[m[2]]??0,Number(m[1])).getTime()}
+function newestFirst(a,b){return yearOf(b)-yearOf(a)||dateValue(b)-dateValue(a)||shiftOf(b)-shiftOf(a)||a.id.localeCompare(b.id)}
 function applyFilters(){
  const sub=$("subjectFilter").value,chap=$("chapterFilter").value,diff=$("difficultyFilter").value;
  const oldId=activeId;
- currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff));
+ currentList=QUESTIONS.filter(q=>(sub==="All"||q.subject===sub)&&(chap==="All"||q.chapter===chap)&&(diff==="All"||q.difficulty===diff)).sort(newestFirst);
  const chapterOptions=[...new Set(QUESTIONS.filter(q=>sub==="All"||q.subject===sub).map(q=>q.chapter))];
  const select=$("chapterFilter"),old=chap;
  select.innerHTML='<option value="All">All chapters</option>'+chapterOptions.map(c=>`<option>${esc(c)}</option>`).join("");
@@ -144,7 +168,7 @@ function renderContinue(){
 function renderDashboard(){renderContinue()}
 (function init(){
  const allChapters=[...new Set(QUESTIONS.map(q=>q.chapter))];$("chapterFilter").innerHTML='<option value="All">All chapters</option>'+allChapters.map(c=>`<option>${esc(c)}</option>`).join("");
- updateStats();renderDashboard();applyFilters();
+ updateStats();renderDashboard();selectSubjectTab("Physics");applyFilters();
  // Start on dashboard; question practice is ready when opened.
 })();
 </script>
